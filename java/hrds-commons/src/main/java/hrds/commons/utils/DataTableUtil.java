@@ -163,7 +163,7 @@ public class DataTableUtil {
     @Param(name = "table_name", desc = "登记表名", range = "String")
     @Return(desc = "字段信息列表", range = "字段信息列表")
     public static List<Map<String, Object>> getColumnByTableName(String table_name) {
-        //初始化查询Sql TODO 目前只考虑DCL,DML
+        //初始化查询Sql
         SqlOperator.Assembler asmSql = SqlOperator.Assembler.newInstance();
         asmSql.clean();
         //DCL
@@ -191,9 +191,9 @@ public class DataTableUtil {
         if (tableIsExistInDataStoreReg(tableName)) {
             throw new BusinessException("表在源文件表中已经存在!" + tableName);
         }
-        if (tableIsExistInDatatableInfo(tableName)) {
-            throw new BusinessException("表在集市数据表中已经存在!" + tableName);
-        }
+//		if (tableIsExistInDatatableInfo(tableName)) {
+//			throw new BusinessException("表在集市数据表中已经存在!" + tableName);
+//		}
 //		if (tableIsExistInEdwTable(tableName)) {
 //			throw new BusinessException("表在数据仓库表中已经存在!" + tableName);
 //		}
@@ -221,17 +221,17 @@ public class DataTableUtil {
                 -> new BusinessException("检查表名称否重复在源文件信息表的SQL编写错误")) != 0;
     }
 
-    @Method(desc = "判断表是否在集市数据表存在",
-            logicStep = "1.判断表是否在集市数据表存在")
-    @Param(name = "tableName", desc = "表名", range = "String类型,不大于512字符")
-    @Return(desc = "boolean", range = "true: 存在 或者 false: 不存在")
-    private static boolean tableIsExistInDatatableInfo(String tableName) {
-        //1.判断表是否在集市数据表存在
-        return Dbo.queryNumber("SELECT count(1) count FROM " + Dm_datatable.TableName +
-                " WHERE lower(datatable_en_name) = lower(?)", tableName.toLowerCase()).orElseThrow(()
-                -> new BusinessException("检查表名称否重复在集市数据表的SQL编写错误")) != 0;
-    }
-
+//	@Method(desc = "判断表是否在集市数据表存在",
+//			logicStep = "1.判断表是否在集市数据表存在")
+//	@Param(name = "tableName", desc = "表名", range = "String类型,不大于512字符")
+//	@Return(desc = "boolean", range = "true: 存在 或者 false: 不存在")
+//	private static boolean tableIsExistInDatatableInfo(String tableName) {
+//		//1.判断表是否在集市数据表存在
+//		return Dbo.queryNumber("SELECT count(1) count FROM " + Datatable_info.TableName +
+//				" WHERE lower(datatable_en_name) = lower(?)", tableName.toLowerCase()).orElseThrow(()
+//				-> new BusinessException("检查表名称否重复在集市数据表的SQL编写错误")) != 0;
+//	}
+//
 //	@Method(desc = "判断表是否在数据仓库表存在",
 //			logicStep = "1.判断表是否在数据仓库表存在")
 //	@Param(name = "tableName", desc = "表名", range = "String类型,不大于512字符")

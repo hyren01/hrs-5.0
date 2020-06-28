@@ -56,7 +56,7 @@ public class MarketConf implements Serializable {
     /**
      * 集市表存储关系表
      */
-    private Dtab_relation_store dtabRelationStore = null;
+    private Dm_relation_datatable dmRelationDatatable = null;
     /**
      * 集市存储层配置表
      */
@@ -162,12 +162,12 @@ public class MarketConf implements Serializable {
         this.datatableFields = datatableFields;
     }
 
-    public Dtab_relation_store getDtabRelationStore() {
-        return dtabRelationStore;
+    public Dm_relation_datatable getDmRelationDatatable() {
+        return dmRelationDatatable;
     }
 
-    void setDtabRelationStore(Dtab_relation_store dtabRelationStore) {
-        this.dtabRelationStore = dtabRelationStore;
+    void setDmRelationDatatable(Dm_relation_datatable dmRelationDatatable) {
+        this.dmRelationDatatable = dmRelationDatatable;
     }
 
     public Data_store_layer getDataStoreLayer() {

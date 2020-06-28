@@ -92,15 +92,15 @@ public class MarketConfUtils {
             /*
               根据主键 datatable_id 查询出 集市表存储关系表
              */
-            Dtab_relation_store dtabRelationStore = SqlOperator.queryOneObject(db, Dtab_relation_store.class,
-                    "select * from "+Dtab_relation_store.TableName+" where tab_id = ?", datatableId)
+            Dm_relation_datatable dmRelationDatatable = SqlOperator.queryOneObject(db, Dm_relation_datatable.class,
+                    "select * from dm_relation_datatable where datatable_id = ?", datatableId)
                     .orElseThrow(() -> new AppSystemException(String.format(nullQueryExceptString,
-                            Dtab_relation_store.TableName, "tab_id", datatableId)));
+                            Dm_relation_datatable.TableName, "datatable_id", datatableId)));
 
-            marketConf.setDtabRelationStore(dtabRelationStore);
+            marketConf.setDmRelationDatatable(dmRelationDatatable);
 
             //存储层配置id
-            Long dslId = dtabRelationStore.getDsl_id();
+            Long dslId = dmRelationDatatable.getDsl_id();
             /*
               根据 存储层配置id 查询出 数据存储层配置表
              */

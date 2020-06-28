@@ -46,8 +46,8 @@ public class TSBAction extends BaseAction {
         TreeConf treeConf = new TreeConf();
         treeConf.setShowFileCollection(Boolean.FALSE);
         //根据源菜单信息获取节点数据列表
-        List<Map<String, Object>> dataList = TreeNodeInfo.getTreeNodeInfo(TreePageSource.DATA_BENCHMARKING, getUser()
-                , treeConf);
+        List<Map<String, Object>> dataList =
+                TreeNodeInfo.getTreeNodeInfo(TreePageSource.DATA_BENCHMARKING, getUser(), treeConf);
         //转换节点数据列表为分叉树列表
         return NodeDataConvertedTreeList.dataConversionTreeInfo(dataList);
     }

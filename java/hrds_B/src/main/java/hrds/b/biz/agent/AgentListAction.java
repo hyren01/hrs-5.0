@@ -8,6 +8,7 @@ import fd.ng.core.annotation.Param;
 import fd.ng.core.annotation.Return;
 import fd.ng.core.utils.CodecUtil;
 import fd.ng.core.utils.DateUtil;
+import fd.ng.core.utils.FileUtil;
 import fd.ng.core.utils.StringUtil;
 import fd.ng.db.resultset.Result;
 import fd.ng.web.util.Dbo;
@@ -18,22 +19,21 @@ import hrds.commons.base.BaseAction;
 import hrds.commons.codes.AgentType;
 import hrds.commons.codes.CleanType;
 import hrds.commons.codes.IsFlag;
-import hrds.commons.codes.StoreLayerDataSource;
 import hrds.commons.entity.Agent_down_info;
 import hrds.commons.entity.Agent_info;
 import hrds.commons.entity.Collect_job_classify;
 import hrds.commons.entity.Column_clean;
 import hrds.commons.entity.Column_merge;
 import hrds.commons.entity.Column_split;
+import hrds.commons.entity.Column_storage_info;
 import hrds.commons.entity.Data_extraction_def;
+import hrds.commons.entity.Data_relation_table;
 import hrds.commons.entity.Data_source;
 import hrds.commons.entity.Data_store_layer;
 import hrds.commons.entity.Data_store_layer_added;
 import hrds.commons.entity.Data_store_layer_attr;
 import hrds.commons.entity.Data_store_reg;
 import hrds.commons.entity.Database_set;
-import hrds.commons.entity.Dcol_relation_store;
-import hrds.commons.entity.Dtab_relation_store;
 import hrds.commons.entity.Etl_sub_sys_list;
 import hrds.commons.entity.Etl_sys;
 import hrds.commons.entity.File_collect_set;
@@ -454,12 +454,7 @@ public class AgentListAction extends BaseAction {
 
 	@Method(
 		desc = "根据ID删除DB文件采集任务数据",
-		logicStep =
-			""
-				+ "1、根据collectSetId和user_id判断是否有这样一条数据"
-				+ "2、在数据库设置表中删除对应的记录"
-				+ "3、删除该数据库采集任务中所有的表信息和列信息(table_id做外键和column_id做外键的相关表的记录全部作为脏数据删除)"
-				+ "4、在数据库采集对应表中删除相应的数据，删除的数据可能是1-N")
+		logicStep = "" + "1、根据collectSetId和user_id判断是否有这样一条数据" + "2、在数据库设置表中删除对应的记录")
 	@Param(name = "collectSetId", desc = "源系统数据库设置表ID", range = "不为空")
 	// TODO IOnWayCtrl.checkExistsTask()暂时先不管
 	public void deleteDFTask(long collectSetId) {
@@ -489,18 +484,6 @@ public class AgentListAction extends BaseAction {
 			"删除数据文件采集任务异常!",
 			"delete from " + Database_set.TableName + " where database_id =?",
 			collectSetId);
-		// 3、删除该数据库采集任务中所有的表信息和列信息(table_id做外键和column_id做外键的相关表的记录全部作为脏数据删除)
-		List<Object> tableIds =
-			Dbo.queryOneColumnList(
-				"select table_id from " + Table_info.TableName + " where database_id = ?",
-				collectSetId);
-		if (!tableIds.isEmpty()) {
-			for (Object tableId : tableIds) {
-				deleteDirtyDataOfTb((long) tableId);
-			}
-		}
-		// 4、在数据库采集对应表中删除相应的数据，删除的数据可能是1-N
-		Dbo.execute("delete from " + Table_info.TableName + " where database_id = ? ", collectSetId);
 	}
 
 	@Method(
@@ -756,7 +739,7 @@ public class AgentListAction extends BaseAction {
 					+ "ti.remark, ti.is_user_defined, ti.is_md5,ti.is_register,ti.is_parallel,ti.page_sql,ti.rec_num_date,"
 					+ "ti.unload_type,ti.is_customize_sql,ti.pageparallels, ti.dataincrement,tsi.storage_type, "
 					+ "tsi.storage_time, tsi.is_zipper, ds.datasource_number || '_' || cjc.classify_num || '_' || "
-					+ "ti.table_name as hbase_name, ds.datasource_name, ai.agent_name, ai.agent_id, ds.source_id"
+					+ "ti.table_name as hbase_name, ds.datasource_name, ai.agent_name, ai.agent_id,ai.user_id, ds.source_id"
 					+ " FROM "
 					+ Data_source.TableName
 					+ " ds "
@@ -1066,7 +1049,7 @@ public class AgentListAction extends BaseAction {
 					+ "ti.remark, ti.is_user_defined, ti.is_md5,ti.is_register,ti.is_parallel,ti.page_sql,ti.rec_num_date,"
 					+ "ti.unload_type,ti.is_customize_sql,ti.pageparallels, ti.dataincrement,tsi.storage_type, "
 					+ "tsi.storage_time, tsi.is_zipper, tsi.hyren_name as hbase_name, ds.datasource_name, ai.agent_name, ai.agent_id, ds.source_id, "
-					+ "dsr.storage_date FROM "
+					+ "ai.user_id , dsr.storage_date FROM "
 					+ Data_source.TableName
 					+ " ds "
 					+ " JOIN "
@@ -1228,12 +1211,12 @@ public class AgentListAction extends BaseAction {
 						+ Length_contrast_sum.TableName
 						+ " lcs on dsl.dlcs_id = lcs.dlcs_id"
 						+ " where dsl.dsl_id in (select drt.dsl_id from "
-						+ Dtab_relation_store.TableName
-						+ " drt where drt.tab_id = "
+						+ Data_relation_table.TableName
+						+ " drt where drt.storage_id = "
 						+ " (select storage_id from "
 						+ Table_storage_info.TableName
-						+ " tsi where tsi.table_id = ?) AND drt.data_source = ?)",
-					tableId, StoreLayerDataSource.DB.getCode());
+						+ " tsi where tsi.table_id = ?))",
+					tableId);
 
 			JSONArray dataStoreArray = JSONArray.parseArray(dataStoreResult.toJSON());
 
@@ -1271,25 +1254,25 @@ public class AgentListAction extends BaseAction {
 				List<Object> storeLayers =
 					Dbo.queryOneColumnList(
 						"select dsla.dsla_storelayer from "
-							+ Dcol_relation_store.TableName
+							+ Column_storage_info.TableName
 							+ " csi"
 							+ " left join "
 							+ Data_store_layer_added.TableName
 							+ " dsla"
 							+ " on dsla.dslad_id = csi.dslad_id"
-							+ " where csi.col_id in"
+							+ " where csi.column_id in"
 							+ " (select column_id from "
 							+ Table_column.TableName
 							+ " where table_id = ?) "
-							+ " and dsla.dsl_id = ? AND csi.data_source = ?",
+							+ " and dsla.dsl_id = ?",
 						tableId,
-						dslId, StoreLayerDataSource.DB.getCode());
+						dslId);
 
 				Result columnResult =
 					Dbo.queryResult(
 						"select dsla.dsla_storelayer, csi.csi_number, tc.column_name "
 							+ " from "
-							+ Dcol_relation_store.TableName
+							+ Column_storage_info.TableName
 							+ " csi"
 							+ " left join "
 							+ Data_store_layer_added.TableName
@@ -1298,12 +1281,13 @@ public class AgentListAction extends BaseAction {
 							+ " join "
 							+ Table_column.TableName
 							+ " tc "
-							+ " on csi.col_id = tc.column_id"
-							+ " where csi.col_id in (select column_id from "
+							+ " on csi.column_id = tc.column_id"
+							+ " where csi.column_id in (select column_id from "
 							+ Table_column.TableName
-							+ " where table_id = ?) and dsla.dsl_id = ? AND csi.data_source = ?",
+							+ " "
+							+ " where table_id = ?) and dsla.dsl_id = ?",
 						tableId,
-						dslId, StoreLayerDataSource.DB.getCode());
+						dslId);
 
 				Map<String, Map<String, Integer>> additInfoFieldMap = new HashMap<>();
 				if (!columnResult.isEmpty() && !storeLayers.isEmpty()) {
@@ -1455,10 +1439,7 @@ public class AgentListAction extends BaseAction {
 				+ "3、删除旧的tableId在数据抽取定义表做外键的数据，不关注删除的数目"
 				+ "4、删除旧的tableId在存储信息表做外键的数据，不关注删除的数目，同时，其对应的存储目的地关联关系也要删除"
 				+ "5、删除旧的tableId在列合并表做外键的数据，不关注删除的数目"
-				+ "6、删除旧的tableId在表清洗规则表做外键的数据，不关注删除的数目"
-				+ "7、删除表对应的作业调度信息(etl_job_def)，不关注删除的数目"
-				+ "8, 删除表的对应的抽数作业关系表信息(data_extraction_def)，不关注删除的数目"
-				+ "9: 删除表的抽取数据抽取定义信息(take_relation_etl)，不关注删除的数目")
+				+ "6、删除旧的tableId在表清洗规则表做外键的数据，不关注删除的数目")
 	@Param(
 		name = "tableId",
 		desc = "数据库对应表ID，" + "数据抽取定义表、表存储信息表、列合并表、表清洗规则表、表对应字段表表外键",
@@ -1480,23 +1461,17 @@ public class AgentListAction extends BaseAction {
 		// 4、删除旧的tableId在存储信息表做外键的数据，不关注删除的数目，同时，其对应的存储目的地关联关系也要删除
 		Dbo.execute(
 			" DELETE FROM "
-				+ Dtab_relation_store.TableName
+				+ Data_relation_table.TableName
 				+ " WHERE storage_id = "
 				+ "(SELECT storage_id FROM "
 				+ Table_storage_info.TableName
-				+ " WHERE table_id = ?) AND data_source = ? ",
-			tableId, StoreLayerDataSource.DB.getCode());
+				+ " WHERE table_id = ?) ",
+			tableId);
 		Dbo.execute(" DELETE FROM " + Table_storage_info.TableName + " WHERE table_id = ? ", tableId);
 		// 5、删除旧的tableId在列合并表做外键的数据，不关注删除的数目
 		Dbo.execute(" DELETE FROM " + Column_merge.TableName + " WHERE table_id = ? ", tableId);
 		// 6、删除旧的tableId在表清洗规则表做外键的数据，不关注删除的数目
 		Dbo.execute(" DELETE FROM " + Table_clean.TableName + " WHERE table_id = ? ", tableId);
-		//7、删除表对应的作业调度信息(etl_job_def)，不关注删除的数目
-//		Dbo.execute("DELETE FROM " + Etl_job_def.TableName + "WHERE etl_job in ()");
-		//8, 删除表的对应的抽数作业关系表信息(data_extraction_def)，不关注删除的数目
-
-		//9: 删除表的抽取数据抽取定义信息(take_relation_etl)，不关注删除的数目
-
 	}
 
 	@Method(
@@ -1509,8 +1484,7 @@ public class AgentListAction extends BaseAction {
 	@Param(name = "columnId", desc = "表对应字段表ID，" + "字段存储信息表、列清洗信息表、列拆分信息表外键", range = "不为空")
 	private void deleteDirtyDataOfCol(long columnId) {
 		// 1、删除旧的columnId在字段存储信息表中做外键的数据，不关注删除的数目
-		Dbo.execute("delete from " + Dcol_relation_store.TableName + " where column_id = ? AND data_source = ?", columnId,
-			StoreLayerDataSource.DB.getCode());
+		Dbo.execute("delete from " + Column_storage_info.TableName + " where column_id = ?", columnId);
 		// 2、删除旧的columnId在列清洗信息表做外键的数据，不关注删除的数目
 		Dbo.execute("delete from " + Column_clean.TableName + " where column_id = ?", columnId);
 		// 3、删除旧的columnId在列拆分信息表做外键的数据，不关注删除的数目
