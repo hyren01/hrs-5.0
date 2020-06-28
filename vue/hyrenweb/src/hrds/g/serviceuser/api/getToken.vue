@@ -145,7 +145,7 @@
             getIpAndPort() {
                 interfaceFunctionAll.getIpAndPort()
                     .then(res => {
-                        this.ipAndPort = "http://" + res.data +
+                        this.ipAndPort = "http://" + res.data.ipAndPort +
                             "/G/action/hrds/g/biz/serviceuser/impl/" + this.$route.query.url;
                         this.requestAddress = this.ipAndPort + "?user_id=1015&user_password=111111"
                     })

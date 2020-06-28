@@ -17,8 +17,8 @@
             <el-divider/>
             <el-row>
                 <el-col :span="11">
-                    <el-form-item label="用户名称" prop="userIds" :rules="filter_rules([{required: true}])">
-                        <el-select v-model="form.userIds" multiple filterable clearable placeholder="请选择">
+                    <el-form-item label="用户名称" prop="user_id" :rules="filter_rules([{required: true}])">
+                        <el-select v-model="form.user_id" multiple filterable clearable placeholder="请选择">
                             <el-option
                                     v-for="item in userData"
                                     :label="item.user_name"
@@ -35,17 +35,17 @@
             </el-row>
             <el-row>
                 <el-col :span="11">
-                    <el-form-item label="开始日期" prop="start_date"
+                    <el-form-item label="开始日期" prop="start_use_date"
                                   :rules="filter_rules([{required: true}])">
                         <el-date-picker type="date" placeholder="开始日期" value-format="yyyyMMdd"
-                                        v-model="form.start_date" @change="dateStartSelectChange"/>
+                                        v-model="form.start_use_date" @change="dateStartSelectChange"/>
                     </el-form-item>
                 </el-col>
                 <el-col :span="11">
-                    <el-form-item label="结束日期" prop="end_date"
+                    <el-form-item label="结束日期" prop="use_valid_date"
                                   :rules="filter_rules([{required: true}])">
                         <el-date-picker type="date" placeholder="结束日期" value-format="yyyyMMdd"
-                                        v-model="form.end_date" @change="dateEndSelectChange"/>
+                                        v-model="form.use_valid_date" @change="dateEndSelectChange"/>
                     </el-form-item>
                 </el-col>
             </el-row>
@@ -71,21 +71,21 @@
                     </el-table-column>
                     <el-table-column prop="interface_name" label="接口名称" align="center"/>
                     <el-table-column prop="interface_code" label="接口代码" align="center"/>
-                    <el-table-column prop="start_use_date" label="开始日期" align="center">
+                    <el-table-column prop="start_use_date_s" label="开始日期" align="center">
                         <template slot-scope="scope">
                             <el-date-picker type="date" placeholder="开始日期" value-format="yyyyMMdd"
-                                            v-model="scope.row.start_use_date" size="small"
+                                            v-model="scope.row.start_date" size="small"
                                             style="width:100%"/>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="use_valid_date" label="结束日期" align="center">
+                    <el-table-column prop="use_valid_date_s" label="结束日期" align="center">
                         <template slot-scope="scope">
                             <el-date-picker type="date" placeholder="结束日期" value-format="yyyyMMdd"
-                                            v-model="scope.row.use_valid_date" size="small"
+                                            v-model="scope.row.end_date" size="small"
                                             style="width: 100%"/>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="use_state" label="接口状态" align="center">
+                    <el-table-column prop="interface_state" label="接口状态" align="center">
                         <template slot-scope="scope">{{interfaceStateObj[scope.row.interface_state]}}
                         </template>
                     </el-table-column>
@@ -120,8 +120,16 @@
                 interfaceType: [],
                 interfaceState: [],
                 interfaceStateObj: {},
+                start_date: "",
+                end_date: "",
                 activeName: "",
-                form: {},
+                form: {
+                    start_use_date: "",
+                    use_valid_date: "",
+                    interface_note: "",
+                    classify_name: "",
+                    user_id: []
+                },
             }
         },
         created() {
@@ -171,7 +179,15 @@
             },
             // 新增接口使用信息
             saveInterfaceUseInfo(formName) {
-                this.form["interfaceUses"] = JSON.stringify(this.selectRow);
+                let interfaceUseInfos = [];
+                this.selectRow.forEach(o => {
+                    let param = {};
+                    param["interface_id"] = o.interface_id;
+                    param["start_use_date"] = o.start_date;
+                    param["use_valid_date"] = o.end_date;
+                    interfaceUseInfos.push(param);
+                });
+                this.form["interfaceUseInfos"] = JSON.stringify(interfaceUseInfos);
                 this.$refs[formName].validate(valid => {
                     if (valid) {
                         // 处理参数
@@ -224,12 +240,12 @@
             },
             dateStartSelectChange(val) {
                 this.tableData.forEach(o => {
-                    o.start_use_date = val;
+                    o.start_date = val;
                 })
             },
             dateEndSelectChange(val) {
                 this.tableData.forEach(o => {
-                    o.use_valid_date = val;
+                    o.end_date = val;
                 })
             },
         }

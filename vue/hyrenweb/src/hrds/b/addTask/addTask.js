@@ -91,19 +91,6 @@ export function viewLog(data) {
         params: data
     })
 }
-// 全表存储目的地弹框
-export function getStorageData() {
-    return request({
-        url: '/B/agent/dbagentconf/stodestconf/getStorageData',
-    })
-}
-// 点击详情
-export function getStoDestDetail(data) {
-    return request({
-        url: '/B/agent/dbagentconf/stodestconf/getStoDestDetail',
-        params: data
-    })
-}
 // steps2
 // 获取初始信息
 export function steps_getInitInfo(data) {
@@ -501,7 +488,13 @@ export function getStoDestByTableId(data) {
         params: data
     })
 }
-
+// 点击详情
+export function getStoDestDetail(data) {
+    return request({
+        url: '/B/agent/dbagentconf/stodestconf/getStoDestDetail',
+        params: data
+    })
+}
 // 点击配置属性按钮
 export function getColumnStoInfo(data) {
     return request({

@@ -1,6 +1,6 @@
 <template>
 <div id="steps6">
-    <Step :active="active" :typeinfo='typeinfo'></Step>
+    <Step :active="active"></Step>
     <el-form :model="ruleForm" status-icon ref="ruleForm" label-width="30%">
         <div class="startupform">
             <el-row type="flex" justify="center">
@@ -277,7 +277,6 @@ export default {
     data() {
         return {
             active: 4,
-            typeinfo:1,
             isLoading: false,
             dbid: null,
             aId: null,
