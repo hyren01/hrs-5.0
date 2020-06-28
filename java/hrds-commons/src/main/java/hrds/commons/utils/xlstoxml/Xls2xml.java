@@ -125,13 +125,12 @@ public class Xls2xml {
 		}
 	}
 
-	public static void toXml2(String db_path, String xml_path) {
+	public static void toXmlForObjectCollect(String db_path, String xml_path) {
 
-		db_path = pathToUnEscape(db_path + File.separator + "~dd_data.json");
-		logger.info("采集文件路径：" + db_path);
-		File file = FileUtils.getFile(db_path);
+		String path_cd = pathToUnEscape(db_path + "~dd_data.json");
+		File file = FileUtils.getFile(path_cd);
 		if (file.exists()) {
-			jsonToXml2(db_path, xml_path);
+			jsonToXmlForObjectCollect(path_cd, xml_path);
 		} else {
 			throw new BusinessException("没有找到相应的数据字典定义文件！");
 		}
@@ -143,10 +142,10 @@ public class Xls2xml {
 	 * @param json_path json格式数据字典目录
 	 * @param xml_path  生成xml文件目录
 	 */
-	public static void jsonToXml2(String json_path, String xml_path) {
+	public static void jsonToXmlForObjectCollect(String json_path, String xml_path) {
 		// 调用方法生成xml文件
 		createXml(xml_path);
-		BufferedReader br = null;
+		BufferedReader br;
 		try {
 			StringBuilder result = new StringBuilder();
 			// 构造一个BufferedReader类来读取文件
@@ -167,7 +166,7 @@ public class Xls2xml {
 				String updatetype = json.getString("updatetype");
 				// 表信息处理
 				addTable(table_name.toLowerCase(), table_ch_name, updatetype);
-				JSONObject handleType = json.getJSONObject("handle_type");
+				JSONObject handleType = json.getJSONObject("handletype");
 				// 数据处理类型
 				addHandleType(handleType.getString("insert"), handleType.getString("update"),
 						handleType.getString("delete"));
@@ -180,56 +179,62 @@ public class Xls2xml {
 					// 字段名
 					String column_name = column.getString("column_name").toLowerCase();
 					// 字段中文名
-					String column_ch_name = column.getString("column_ch_name");
+					String column_cn_name = column.getString("column_cn_name");
 					// 字段类型
 					String column_type = column.getString("column_type");
+					// 是否为主键
+					String is_key = column.getString("is_key");
 					// 备注信息
 					String column_remark = column.getString("column_remark");
 					// 字段位置
 					String columnposition = column.getString("columnposition");
-					// 是否操作标识表
+					// 是否进入hbase
+					String is_hbase = column.getString("is_hbase");
+					// 是否为rowkey
+					String is_rowkey = column.getString("is_rowkey");
+					// 是否进solr
+					String is_solr = column.getString("is_solr");
+					// 是否为操作标识字段
 					String is_operate = column.getString("is_operate");
 					int length = getLength(column_type);
 					// 列信息封装
-					addColumnToSemiStructuredCollect(column_id, column_name, column_ch_name, column_type,
-							column_remark, columnposition, is_operate);
+					addColumnForObjectCollect(column_id, column_name, column_cn_name, column_type, length,
+							column_remark, is_key, columnposition, is_hbase, is_rowkey, is_solr, is_operate);
 				}
 			}
 			// 生成xml文档
 			xmlCreater.buildXmlFile();
+			br.close();
 		} catch (FileNotFoundException e) {
 			throw new BusinessException("文件不存在," + e.getMessage());
 		} catch (IOException e) {
 			throw new BusinessException("读取文件失败," + e.getMessage());
-		} finally {
-			if (br != null) {
-				try {
-					br.close();
-				} catch (IOException e) {
-					logger.error(e);
-				}
-			}
 		}
 	}
 
-	public static void addColumnToSemiStructuredCollect(String column_id, String column_name,
-	                                                    String column_ch_name, String column_type,
-	                                                    String column_remark, String columnposition,
-	                                                    String is_operate) {
+	public static void addColumnForObjectCollect(String column_id, String column_name, String column_cn_name,
+	                                             String column_type, int length, String column_remark,
+	                                             String is_key, String columnposition, String is_hbase,
+	                                             String is_rowkey, String is_solr, String is_operate) {
 
-		column = xmlCreater.createElement(table, "columns");
+		column = xmlCreater.createElement(table, "column");
 		xmlCreater.createAttribute(column, "column_id", column_id);
 		xmlCreater.createAttribute(column, "column_name", column_name);
-		xmlCreater.createAttribute(column, "column_ch_name", column_ch_name);
+		xmlCreater.createAttribute(column, "column_cn_name", column_cn_name);
 		xmlCreater.createAttribute(column, "column_type", column_type);
+		xmlCreater.createAttribute(column, "length", String.valueOf(length));
+		xmlCreater.createAttribute(column, "is_key", is_key);
 		xmlCreater.createAttribute(column, "column_remark", column_remark);
 		xmlCreater.createAttribute(column, "columnposition", columnposition);
+		xmlCreater.createAttribute(column, "is_hbase", is_hbase);
+		xmlCreater.createAttribute(column, "is_rowkey", is_rowkey);
+		xmlCreater.createAttribute(column, "is_solr", is_solr);
 		xmlCreater.createAttribute(column, "is_operate", is_operate);
 	}
 
 	public static void addHandleType(String insert, String update, String delete) {
 
-		handleType = xmlCreater.createElement(table, "handle_type");
+		handleType = xmlCreater.createElement(table, "handletype");
 		xmlCreater.createAttribute(handleType, "insert", insert);
 		xmlCreater.createAttribute(handleType, "update", update);
 		xmlCreater.createAttribute(handleType, "delete", delete);

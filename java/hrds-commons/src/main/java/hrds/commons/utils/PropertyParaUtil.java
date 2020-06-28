@@ -5,11 +5,8 @@ import fd.ng.core.annotation.Method;
 import fd.ng.core.annotation.Param;
 import fd.ng.core.annotation.Return;
 import fd.ng.core.conf.ConfFileLoader;
-import fd.ng.core.utils.StringUtil;
 import fd.ng.core.yaml.YamlFactory;
 import fd.ng.core.yaml.YamlMap;
-
-import java.math.BigDecimal;
 
 @DocClass(desc = "agent获取系统参数配置类", author = "zxz", createdate = "2019/11/8 14:30")
 public class PropertyParaUtil {

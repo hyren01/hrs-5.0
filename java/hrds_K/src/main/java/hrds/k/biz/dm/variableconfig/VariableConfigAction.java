@@ -19,7 +19,8 @@ import java.util.List;
 @DocClass(desc = "数据管控-变量配置类", author = "BY-HLL", createdate = "2020/4/3 0003 下午 05:08")
 public class VariableConfigAction extends BaseAction {
 
-    @Method(desc = "添加变量配置数据信息", logicStep = "添加变量配置数据信息")
+    @Method(desc = "添加变量配置数据信息",
+            logicStep = "添加变量配置数据信息")
     @Param(name = "dq_sys_cfg", desc = "Dq_sys_cfg实体", range = "Dq_sys_cfg实体", isBean = true)
     public void addVariableConfigDat(Dq_sys_cfg dq_sys_cfg) {
         //数据校验
@@ -38,18 +39,19 @@ public class VariableConfigAction extends BaseAction {
     }
 
     @Method(desc = "删除变量配置数据", logicStep = "删除变量配置数据")
-    @Param(name = "sys_var_id_s", desc = "变量配置id数组", range = "long类型数组")
-    public void deleteVariableConfigData(Long[] sys_var_id_s) {
+    @Param(name = "sys_var_id", desc = "变量配置id数组", range = "long类型数组")
+    public void deleteVariableConfigData(Long[] sys_var_id) {
         //初始化sql
         SqlOperator.Assembler asmSql = SqlOperator.Assembler.newInstance();
         asmSql.clean();
         asmSql.addSql("delete from " + Dq_sys_cfg.TableName + " where user_id=?");
         asmSql.addParam(getUserId());
-        asmSql.addORParam("sys_var_id ", sys_var_id_s);
+        asmSql.addORParam("sys_var_id ", sys_var_id);
         Dbo.execute(asmSql.sql(), asmSql.params());
     }
 
-    @Method(desc = "修改变量配置数据信息", logicStep = "修改变量配置数据信息")
+    @Method(desc = "修改变量配置数据信息",
+            logicStep = "修改变量配置数据信息")
     @Param(name = "dq_sys_cfg", desc = "Dq_sys_cfg实体", range = "Dq_sys_cfg实体", isBean = true)
     public void updateVariableConfigData(Dq_sys_cfg dq_sys_cfg) {
         //数据校验
@@ -64,10 +66,11 @@ public class VariableConfigAction extends BaseAction {
         dq_sys_cfg.update(Dbo.db());
     }
 
-    @Method(desc = "获取所有变量配置数据信息", logicStep = "获取所有变量配置数据信息(变量不会有很多,这里不做分页)")
+    @Method(desc = "获取所有变量配置数据信息",
+            logicStep = "获取所有变量配置数据信息(变量不会有很多,这里不做分页)")
     @Return(desc = "变量配置数据信息", range = "变量配置数据信息")
     public List<Dq_sys_cfg> getVariableConfigDataInfos() {
-        return Dbo.queryList(Dq_sys_cfg.class, "SELECT * FROM " + Dq_sys_cfg.TableName + " where user_id=?", getUserId());
+        return Dbo.queryList(Dq_sys_cfg.class, "SELECT * FROM " + Dq_sys_cfg.TableName);
     }
 
     @Method(desc = "获取变量配置数据信息", logicStep = "获取变量配置数据信息")
@@ -95,7 +98,7 @@ public class VariableConfigAction extends BaseAction {
             asmSql.addLikeParam(" var_name", '%' + var_name + '%');
         }
         if (StringUtil.isNotBlank(var_value)) {
-            asmSql.addLikeParam("var_value", '%' + var_value + '%');
+            asmSql.addLikeParam(" var_value", '%' + var_value + '%');
         }
         if (StringUtil.isNotBlank(start_date)) {
             asmSql.addSql(" and app_updt_dt >= ?").addParam(start_date);

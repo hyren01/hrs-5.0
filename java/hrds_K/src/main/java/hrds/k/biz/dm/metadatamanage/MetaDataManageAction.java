@@ -140,6 +140,7 @@ public class MetaDataManageAction extends BaseAction {
         data_meta_info.put("file_id", failure_table_id);
         data_meta_info.put("table_id", table_id);
         data_meta_info.put("data_layer", table_source);
+        //如果表类型为空,设置表类型为来源数据层,不为空代表表来源是DCL层下的 dcl_batch:批量数据或 dcl_realtime:实时数据
         data_meta_info.put("table_name", dq_failure_table.getTable_en_name());
         data_meta_info.put("table_ch_name", dq_failure_table.getTable_cn_name());
         //如果表的创建日期为空,默认设置为99991231

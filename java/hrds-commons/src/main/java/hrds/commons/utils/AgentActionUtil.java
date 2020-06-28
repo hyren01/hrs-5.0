@@ -52,22 +52,17 @@ public class AgentActionUtil {
 	public static final String ADDDATASTOREREG = "/hrds/server/addDataStoreReg";
 	//向agent端发送一个数据库采集抽取任务
 	public static final String SENDJDBCCOLLECTTASKINFO = "/hrds/agent/trans/biz/jdbccollect/execute";
-	//向agent端发送页面配置，生成数据库抽取的数据字典
-	public static final String GETDICTIONARYJSON = "/hrds/agent/trans/biz/jdbccollect/getDictionaryJson";
 	//向agent端发送一个db文件采集任务
 	public static final String SENDDBCOLLECTTASKINFO = "/hrds/agent/trans/biz/dbfilecollect/execute";
 	//agent连接服务端批量添加ftp_transfered(ftp已传输表)
 	public static final String BATCHADDFTPTRANSFER = "/hrds/server/batchAddFtpTransfer";
 	//向agent端发送一个ftp采集的任务
 	public static final String SENDFTPCOLLECTTASKINFO = "/hrds/agent/trans/biz/ftpcollect/execute";
-	//向agent发送一个半结构化直连解析数据字典获取表信息
-	public static final String GETDICTABLE = "/hrds/agent/trans/biz/semistructured/getDicTable";
-	//向agent发送一个半结构化直连解析数据字典所有表对应所有列信息
-	public static final String GETALLDICCOLUMNS = "/hrds/agent/trans/biz/semistructured/getAllDicColumns";
-	//向agent发送一个半结构化直连解析数据字典获取所有表对应所有数据处理方式信息
-	public static final String GETALLHANDLETYPE = "/hrds/agent/trans/biz/semistructured/getAllHandleType";
+	//向agent发送一个半结构化直连解析数据字典任务
+	public static final String PARSEDATADICTIONARY = "/hrds/agent/trans/biz/objectCollect" +
+			"/parseObjectCollectDataDictionary";
 	//向agent发送一个半结构化直连重写数据字典任务
-	public static final String WRITEDICTIONARY = "/hrds/agent/trans/biz/semistructured/writeDictionary";
+	public static final String WRITEDICTIONARY = "/hrds/agent/trans/biz/objectCollect/writeDictionary";
 
 	static {
 		list = new ArrayList<>();
@@ -89,14 +84,11 @@ public class AgentActionUtil {
 		list.add(SENDDBCOLLECTTASKINFO);
 		list.add(BATCHADDFTPTRANSFER);
 		list.add(SENDFTPCOLLECTTASKINFO);
-		list.add(GETDICTABLE);
-		list.add(GETALLDICCOLUMNS);
-		list.add(GETALLHANDLETYPE);
+		list.add(PARSEDATADICTIONARY);
 		list.add(WRITEDICTIONARY);
 		list.add(ADDDATASTOREREG);
 		list.add(GETAlLLTABLECOLUMN);
 		list.add(GETALLTABLESTORAGE);
-		list.add(GETDICTIONARYJSON);
 	}
 
 	private AgentActionUtil() {

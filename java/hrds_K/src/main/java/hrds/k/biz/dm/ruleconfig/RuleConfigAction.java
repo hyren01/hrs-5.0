@@ -5,6 +5,7 @@ import fd.ng.core.annotation.Method;
 import fd.ng.core.annotation.Param;
 import fd.ng.core.annotation.Return;
 import fd.ng.core.utils.DateUtil;
+import fd.ng.core.utils.JsonUtil;
 import fd.ng.core.utils.StringUtil;
 import fd.ng.core.utils.Validator;
 import fd.ng.db.jdbc.SqlOperator;
@@ -37,25 +38,24 @@ public class RuleConfigAction extends BaseAction {
 
     @Method(desc = "获取数据源树信息", logicStep = "获取数据源树信息")
     @Return(desc = "数据源树信息", range = "数据源树信息")
-    public List<Node> getRuleConfigTreeData() {
-        //TODO 使用公共的树接口 hrsv5.1
+    public Object getRuleConfigTreeData() {
         //配置树不显示文件采集的数据
         TreeConf treeConf = new TreeConf();
         treeConf.setShowFileCollection(Boolean.FALSE);
         //根据源菜单信息获取节点数据列表
-        List<Map<String, Object>> dataList = TreeNodeInfo.getTreeNodeInfo(TreePageSource.DATA_MANAGEMENT, getUser(),
-                treeConf);
+        List<Map<String, Object>> dataList =
+                TreeNodeInfo.getTreeNodeInfo(TreePageSource.DATA_MANAGEMENT, getUser(), treeConf);
         //转换节点数据列表为分叉树列表
-        return NodeDataConvertedTreeList.dataConversionTreeInfo(dataList);
+        List<Node> ruleConfigTreeList = NodeDataConvertedTreeList.dataConversionTreeInfo(dataList);
+        return JsonUtil.toObjectSafety(ruleConfigTreeList.toString(), Object.class).orElseThrow(()
+                -> (new BusinessException("数据类型转换失败!")));
     }
 
     @Method(desc = "添加规则", logicStep = "添加规则")
     @Param(name = "dq_definition", desc = "Dq_definition的实体对象", range = "Dq_definition的实体对象", isBean = true)
     public void addDqDefinition(Dq_definition dq_definition) {
         //数据校验
-        if (StringUtil.isBlank(dq_definition.getCase_type())) {
-            throw new BusinessException("规则类型为空!");
-        }
+        Validator.notBlank(dq_definition.getCase_type(), "规则类型为空!");
         //设置数据对象
         dq_definition.setReg_num(PrimayKeyGener.getNextId());
         dq_definition.setApp_updt_dt(DateUtil.getSysDate());
@@ -71,19 +71,16 @@ public class RuleConfigAction extends BaseAction {
             dq_definition.setIs_saveindex3(IsFlag.Fou.getCode());
         }
         dq_definition.setUser_id(getUserId());
-        if (StringUtil.isNotBlank(dq_definition.getSpecify_sql())) {
-            dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\n", " "));
-            dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\t", " "));
-        }
-        if (StringUtil.isNotBlank(dq_definition.getErr_data_sql())) {
-            dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\n", " "));
-            dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\t", " "));
-        }
+        dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\n", " "));
+        dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\t", " "));
+        dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\n", " "));
+        dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\t", " "));
         //添加规则
         dq_definition.add(Dbo.db());
     }
 
-    @Method(desc = "删除规则(编号删除)", logicStep = "删除规则(编号删除)")
+    @Method(desc = "删除规则(编号删除)",
+            logicStep = "删除规则(编号删除)")
     @Param(name = "reg_num", desc = "规则编号", range = "long类型,数组")
     public void deleteDqDefinition(long reg_num) {
         //检查数据
@@ -93,7 +90,8 @@ public class RuleConfigAction extends BaseAction {
         }
     }
 
-    @Method(desc = "删除规则(批量)", logicStep = "删除规则(批量)")
+    @Method(desc = "删除规则(批量)",
+            logicStep = "删除规则(批量)")
     @Param(name = "reg_num", desc = "规则编号", range = "long[]类型,数组")
     public void releaseDeleteDqDefinition(Long[] reg_num) {
         //检查
@@ -101,17 +99,18 @@ public class RuleConfigAction extends BaseAction {
         SqlOperator.Assembler asmSql = SqlOperator.Assembler.newInstance();
         asmSql.clean();
         asmSql.addSql("delete from " + Dq_definition.TableName + " where user_id=?");
-        asmSql.addParam(getUserId());
+        asmSql.addParam(getUserId().toString());
         asmSql.addORParam("reg_num ", reg_num);
         //删除数据
         Dbo.execute(asmSql.sql(), asmSql.params());
     }
 
-    @Method(desc = "更新规则", logicStep = "更新规则")
+    @Method(desc = "更新规则",
+            logicStep = "更新规则")
     @Param(name = "dq_definition", desc = "Dq_definition的实体对象", range = "Dq_definition的实体对象")
     public void updateDqDefinition(Dq_definition dq_definition) {
         //数据校验
-        Validator.notBlank(dq_definition.getReg_num().toString(), "修改规则编号为空");
+        Validator.notBlank(dq_definition.getReg_num().toString(), "修改规则编号为空!");
         if (!checkRegNumIsExist(dq_definition.getReg_num())) {
             throw new BusinessException("修改的规则已经不存在!");
         }
@@ -129,19 +128,16 @@ public class RuleConfigAction extends BaseAction {
             dq_definition.setIs_saveindex3(IsFlag.Fou.getCode());
         }
         dq_definition.setUser_id(getUserId());
-        if (StringUtil.isNotBlank(dq_definition.getSpecify_sql())) {
-            dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\n", " "));
-            dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\t", " "));
-        }
-        if (StringUtil.isNotBlank(dq_definition.getErr_data_sql())) {
-            dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\n", " "));
-            dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\t", " "));
-        }
+        dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\n", " "));
+        dq_definition.setSpecify_sql(dq_definition.getSpecify_sql().replace("\t", " "));
+        dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\n", " "));
+        dq_definition.setErr_data_sql(dq_definition.getErr_data_sql().replace("\t", " "));
         //添加规则
         dq_definition.update(Dbo.db());
     }
 
-    @Method(desc = "获取规则信息列表", logicStep = "获取规则信息列表")
+    @Method(desc = "获取规则信息列表",
+            logicStep = "获取规则信息列表")
     @Return(desc = "规则信息列表", range = "规则信息列表")
     public Map<String, Object> getDqDefinitionInfos() {
         //设置查询sql
@@ -164,7 +160,8 @@ public class RuleConfigAction extends BaseAction {
         return dqd_map;
     }
 
-    @Method(desc = "获取规则信息", logicStep = "获取规则信息")
+    @Method(desc = "获取规则信息",
+            logicStep = "获取规则信息")
     @Param(name = "reg_num", desc = "规则编号", range = "long类型")
     @Return(desc = "规则信息", range = "规则信息")
     public Dq_definition getDqDefinition(long reg_num) {
@@ -182,7 +179,7 @@ public class RuleConfigAction extends BaseAction {
     @Return(desc = "字段信息列表", range = "字段信息列表")
     public List<Map<String, Object>> getColumnsByTableName(String table_name) {
         //数据层获取不同表结构
-        Validator.notBlank(table_name, "查询表名不能为空!");
+        Validator.notBlank(table_name, "获取表字段信息的表名为空!");
         return DataTableUtil.getColumnByTableName(table_name);
     }
 
@@ -198,14 +195,18 @@ public class RuleConfigAction extends BaseAction {
         return Dbo.queryList(Dq_help_info.class, "select * from " + Dq_help_info.TableName);
     }
 
-    @Method(desc = "保存作业信息", logicStep = "保存作业信息")
+    @Method(desc = "保存作业信息",
+            logicStep = "保存作业信息")
     @Param(name = "pro_id", desc = "调度工程id", range = "long类型,唯一")
     @Param(name = "task_id", desc = "调度任务id", range = "long类型,唯一")
     @Param(name = "reg_num", desc = "规则编号", range = "long类型,唯一")
     @Return(desc = "返回值说明", range = "返回值取值范围")
     public void saveETLJob(String pro_id, String task_id, String reg_num) {
         //保存作业调度信息
-        EtlJobUtil.saveJob(reg_num, DataSourceType.DQC, pro_id, task_id, null);
+        int save_status = EtlJobUtil.saveJob(reg_num, DataSourceType.DQC, pro_id, task_id, null);
+        if (0 != save_status) {
+            throw new BusinessException("保存作业信息失败!");
+        }
     }
 
     @Method(desc = "搜索规则信息", logicStep = "搜索规则信息")
@@ -338,13 +339,16 @@ public class RuleConfigAction extends BaseAction {
     @Method(desc = "获取作业工程信息", logicStep = "获取作业工程信息")
     @Return(desc = "作业工程信息", range = "作业工程信息")
     public List<Etl_sys> getProInfos() {
-        return EtlJobUtil.getProInfo(getUserId());
+        return EtlJobUtil.getProInfo();
     }
 
-    @Method(desc = "获取作业某个工程下的任务信息", logicStep = "获取作业某个工程下的任务信息")
+    @Method(desc = "获取作业某个工程下的任务信息",
+            logicStep = "获取作业某个工程下的任务信息")
     @Param(name = "etl_sys_cd", desc = "工程代码", range = "String类型")
     @Return(desc = "工程下的任务信息", range = "工程下的任务信息")
     public List<Etl_sub_sys_list> getTaskInfo(String etl_sys_cd) {
+        //数据校验
+        Validator.notBlank(etl_sys_cd, "工程id为空!");
         return EtlJobUtil.getTaskInfo(etl_sys_cd);
     }
 
@@ -412,7 +416,7 @@ public class RuleConfigAction extends BaseAction {
     public Map<String, Object> errDataSqlCheck(Dq_definition dq_definition) {
         //数据校验
         if (StringUtil.isBlank(dq_definition.getErr_data_sql())) {
-            throw new BusinessException("指定SQL为空!");
+            throw new BusinessException("异常数据SQL为空!");
         }
         //系统变量对应结果
         Set<SysVarCheckBean> beans = DqcExecution.getSysVarCheckBean(dq_definition);

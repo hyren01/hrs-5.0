@@ -1,34 +1,38 @@
 package hrds.commons.utils;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import fd.ng.core.annotation.Method;
 import fd.ng.core.annotation.Param;
 import fd.ng.core.annotation.Return;
 import fd.ng.core.utils.StringUtil;
-import fd.ng.core.utils.Validator;
 import hrds.commons.codes.DatabaseType;
-import hrds.commons.codes.OperationType;
-import hrds.commons.entity.Object_handle_type;
 import hrds.commons.exception.AppSystemException;
 import hrds.commons.exception.BusinessException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 /**
  * 标 题: 海云数服务
@@ -66,7 +70,7 @@ public class ConnUtil {
 			jdbcObj.put("jdbcPort", '/');
 			jdbcObj.put("jdbcBase", "?characterEncoding=utf8&zeroDateTimeBehavior=convertToNull");
 		} else if (DatabaseType.Oracle9i.getCode().equals(type)
-				|| DatabaseType.Oracle10g.getCode().equals(type)) {
+			|| DatabaseType.Oracle10g.getCode().equals(type)) {
 			//			conn_url = "jdbc:oracle:thin:@" + database_ip + ":" + database_port + ":" +
 			// database_name;
 			jdbcObj.put("jdbcPrefix", "jdbc:oracle:thin:@");
@@ -171,7 +175,7 @@ public class ConnUtil {
 	 * @return jdbc连接
 	 */
 	public static Connection getConnection(
-			String database_drive, String jdbc_url, String user_name, String database_pad) {
+		String database_drive, String jdbc_url, String user_name, String database_pad) {
 		Connection conn;
 		try {
 			logger.info("开始连接 :" + jdbc_url);
@@ -210,13 +214,13 @@ public class ConnUtil {
 	public static List<String> getJDBCUrlInfo(String jdbcUrl, String jdbcType) {
 
 		String[] regx = {
-				"(\\d+\\.\\d+\\.\\d+\\.\\d+|\\w+):\\d+",
-				".*:(\\d+)",
-				"DBS_PORT=(\\d+)",
-				"\\d+:\\d+:(.*)",
-				";DatabaseName=(.*)",
-				":\\d+/(\\w+)",
-				"DATABASE=(\\w+)"
+			"(\\d+\\.\\d+\\.\\d+\\.\\d+|\\w+):\\d+",
+			".*:(\\d+)",
+			"DBS_PORT=(\\d+)",
+			"\\d+:\\d+:(.*)",
+			";DatabaseName=(.*)",
+			":\\d+/(\\w+)",
+			"DATABASE=(\\w+)"
 		};
 		List<String> list = new ArrayList<>();
 		if (DatabaseType.TeraData.getCode().equals(jdbcType)) {
@@ -296,7 +300,7 @@ public class ConnUtil {
   	return db;
   }*/
 	public static String getDataBaseFile(
-			String database_ip, String database_port, String database_name, String user_name) {
+		String database_ip, String database_port, String database_name, String user_name) {
 
 		return Math.abs((database_name + database_ip + database_port + user_name).hashCode()) + ".xml";
 	}
@@ -489,135 +493,135 @@ public class ConnUtil {
 		return uri.getHost();
 	}
 
-	/**
-	 * 半结构化采集获取数据字典表信息
-	 *
-	 * @param filename 文件路径
-	 * @return
-	 */
-	public static List<Object> getDicTable(String filename) {
-		List<?> xmlToList = getXmlToList(filename);
-		List<Object> tableList = new ArrayList<>();
-		for (Object o : xmlToList) {
-			Element table = (Element) o;
-			Map<String, Object> tableJson = new HashMap<>();
-			tableJson.put("en_name", table.getAttribute("table_name"));
-			tableJson.put("zh_name", table.getAttribute("table_ch_name"));
-			// 数据更新方式：0--直接更新，1--拉链更新
-			tableJson.put("updatetype", table.getAttribute("unload_type"));
-			tableList.add(tableJson);
-		}
-		return tableList;
+	public static JSONObject getTableToXML2(String filename) {
+
+		return loadStoreInfoXML2(filename);
 	}
 
-	@Method(desc = "半结构化采集通过表名获取处理方式值", logicStep = "")
-	@Param(name = "xmlName", desc = "xml文件名称", range = "无限制")
-	@Return(desc = "返回半结构化采集获取数据字典所有表对应列信息", range = "无限制")
-	public static Map<String, List<Object_handle_type>> getAllHandleType(String xmlName) {
-		List<?> xmlToList = getXmlToList(xmlName);
-		Map<String, List<Object_handle_type>> handleTypeMap = new HashMap<>();
-		for (Object o : xmlToList) {
-			List<Object_handle_type> handleTypeList = new ArrayList<>();
-			Element table = (Element) o;
-			Element handleType = XMLUtil.getChildElement(table, "handle_type");
-			Validator.notNull(handleType, "处理类型不能为空,生成xml数据或者数据字典有误");
-			Object_handle_type object_handle_type = new Object_handle_type();
-			object_handle_type.setHandle_type(OperationType.INSERT.getCode());
-			object_handle_type.setHandle_value(handleType.getAttribute("insert"));
-			handleTypeList.add(object_handle_type);
-			object_handle_type.setHandle_type(OperationType.UPDATE.getCode());
-			object_handle_type.setHandle_value(handleType.getAttribute("update"));
-			handleTypeList.add(object_handle_type);
-			object_handle_type.setHandle_type(OperationType.DELETE.getCode());
-			object_handle_type.setHandle_value(handleType.getAttribute("delete"));
-			handleTypeList.add(object_handle_type);
-			handleTypeMap.put(table.getAttribute("table_name"), handleTypeList);
-		}
-		return handleTypeMap;
-	}
+	private static JSONObject loadStoreInfoXML2(String filename) {
 
-	@Method(desc = "半结构化采集获取数据字典所有表对应列信息", logicStep = "")
-	@Param(name = "xmlName", desc = "xml文件名称", range = "无限制")
-	@Param(name = "table_name", desc = "表名称", range = "无限制")
-	@Return(desc = "返回半结构化采集获取数据字典所有表对应列信息", range = "无限制")
-	public static Map<String, List<Map<String, String>>> getColumnByXml2(String xmlName) {
-		List<?> xmlToList = getXmlToList(xmlName);
-		Map<String, List<Map<String, String>>> allColumnMap = new HashMap<>();
-		for (Object value : xmlToList) {
-			List<Map<String, String>> columnList = new ArrayList<>();
-			Element table = (Element) value;
-			List<?> columns = XMLUtil.getChildElements(table, "columns");
-			for (Object object : columns) {
-				Map<String, String> columnMap = new HashMap<>();
-				Element column = (Element) object;
-				columnMap.put("column_name", column.getAttribute("column_name"));
-				columnMap.put("data_desc", column.getAttribute("column_ch_name"));
-				columnMap.put("column_type", column.getAttribute("column_type"));
-				columnMap.put("is_operate", column.getAttribute("is_operate"));
-				columnMap.put("columnposition", column.getAttribute("columnposition"));
-				columnList.add(columnMap);
+		File f = new File(filename);
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(true);
+			DocumentBuilder db;
+			try {
+				db = dbf.newDocumentBuilder();
+			} catch (ParserConfigurationException e) {
+				throw new BusinessException("创建文档管理器失败");
 			}
-			allColumnMap.put(table.getAttribute("table_name"), columnList);
+			Document doc = db.parse(f);
+			Element root = (Element) doc.getElementsByTagName("database").item(0);
+			JSONObject jsonTable = new JSONObject();
+			JSONArray jsonArrayTable = new JSONArray();
+			List<?> tableList = XMLUtil.getChildElements(root, "table");
+			for (int b = 0; b < tableList.size(); b++) {
+				Element table = (Element) tableList.get(b);
+				JSONObject tableJson = new JSONObject();
+				tableJson.put("table_name", table.getAttribute("table_name"));
+				tableJson.put("table_ch_name", table.getAttribute("table_ch_name"));
+				tableJson.put("updatetype", table.getAttribute("unload_type"));
+				List<?> columnList = XMLUtil.getChildElements(table, "column");
+				JSONArray columnJsonArray = new JSONArray();
+				for (int c = 0; c < columnList.size(); c++) {
+					Element column = (Element) columnList.get(c);
+					JSONObject columnJson = new JSONObject();
+					String columnname = column.getAttribute("name");
+					String columntype = column.getAttribute("column_type");
+					String is_key = column.getAttribute("is_key");
+					String is_hbase = column.getAttribute("is_hbase");
+					String is_rowkey = column.getAttribute("is_rowkey");
+					String is_solr = column.getAttribute("is_solr");
+					String is_operate = column.getAttribute("is_operate");
+					String columnposition = column.getAttribute("columnposition");
+					columnJson.put("columnname", columnname);
+					columnJson.put("columntype", columntype);
+					columnJson.put("is_key", is_key);
+					columnJson.put("is_hbase", is_hbase);
+					columnJson.put("is_rowkey", is_rowkey);
+					columnJson.put("is_solr", is_solr);
+					columnJson.put("is_operate", is_operate);
+					columnJson.put("columnposition", columnposition);
+					columnJsonArray.add(columnJson);
+				}
+				tableJson.put("column", columnJsonArray);
+				JSONObject handleTypejson = new JSONObject();
+				Element handleType = XMLUtil.getChildElement(table, "handletype");
+				handleTypejson.put("insert", handleType.getAttribute("insert"));
+				handleTypejson.put("update", handleType.getAttribute("update"));
+				handleTypejson.put("delete", handleType.getAttribute("delete"));
+				tableJson.put("handletype", handleTypejson);
+				jsonArrayTable.add(tableJson);
+			}
+			jsonTable.put("tablename", jsonArrayTable);
+			return jsonTable;
+		} catch (SAXException e) {
+			throw new BusinessException("解析文件异常," + e.getMessage());
+		} catch (IOException e) {
+			throw new BusinessException("加载信息异常," + e.getMessage());
 		}
-		return allColumnMap;
 	}
 
 	@Method(desc = "没有数据字典时读取数据文件", logicStep = "")
-	@Param(desc = "文件路径", name = "file_path", range = "无限制")
+	@Param(desc = "文件路径", name = "dbpath", range = "无限制")
 	@Param(desc = "数据日期", name = "data_date", range = "无限制")
-	@Param(desc = "文件后缀名", name = "file_suffix", range = "无限制")
+	@Param(desc = "文件后缀名", name = "filesuffix", range = "无限制")
 	@Return(desc = "半结构化采集查看表时，对于不提供数据字典的情况，解析返回表名", range = "无限制")
-	public static List<Object> getTableByNoDictionary(String file_path, String data_date, String file_suffix) {
-		JSONObject resultObject = new JSONObject();
-		File pathFile = new File(file_path);
-		File[] fileList = Objects.requireNonNull(pathFile.listFiles());
-		List<String> fileNameList = new ArrayList<>();
-		for (File file : fileList) {
-			fileNameList.add(file.getName());
+	public static JSONObject getTableFromJson(String dbpath, String data_date, String filesuffix) {
+		if (!dbpath.endsWith(File.separator)) {
+			dbpath += File.separator;
 		}
-		if (!fileNameList.contains(data_date)) {
-			resultObject.put("ErrorMessage", "文件路径不存在，请检查:" + file_path + " 下是否存在 " + data_date + " 文件夹");
-			throw new BusinessException(resultObject.getString("ErrorMessage"));
+		JSONObject resultobject = new JSONObject();
+		File dbpathfile = new File(dbpath);
+		File[] dbpathfilelist = Objects.requireNonNull(dbpathfile.listFiles());
+		List<String> dbpathfilelistname = new ArrayList<>();
+		for (File everyfile : dbpathfilelist) {
+			dbpathfilelistname.add(everyfile.getName());
 		}
-		List<String> tableNameList = new ArrayList<>();
-		String filepath = file_path + File.separator + data_date;
+		if (!dbpathfilelistname.contains(data_date)) {
+			resultobject.put("ErrorMessage", "文件路径不存在，请检查:" + dbpath + " 下是否存在 " + data_date + " 文件");
+			throw new BusinessException(resultobject.getString("ErrorMessage"));
+		}
+		List<String> tablenamelsit = new ArrayList<String>();
+		String filepath = dbpath + data_date;
 		File targetFileDirectory = new File(filepath);
 		if (!targetFileDirectory.isDirectory()) {
-			resultObject.put("ErrorMessage", "文件路径：" + filepath + " 不是一个文件夹，请检查");
-			throw new BusinessException(resultObject.getString("ErrorMessage"));
+			resultobject.put("ErrorMessage", "文件路径：" + filepath + " 不是一个文件夹，请检查");
+			throw new BusinessException(resultobject.getString("ErrorMessage"));
 		}
 		List<File> files =
-				new ArrayList<>(Arrays.asList(Objects.requireNonNull(new File(filepath).listFiles())));
+			new ArrayList<File>(Arrays.asList(Objects.requireNonNull(new File(filepath).listFiles())));
 		if (files.size() == 0) {
-			resultObject.put("ErrorMessage", "数据路径的日期目录：" + filepath + " 下没有文件");
-			throw new BusinessException(resultObject.getString("ErrorMessage"));
+			resultobject.put("ErrorMessage", "数据路径的日期目录：" + filepath + " 下没有文件");
+			throw new BusinessException(resultobject.getString("ErrorMessage"));
 		}
-		List<Object> tableList = new ArrayList<>();
-		for (File file : files) {
-			String filename = file.getName();
-			if (filename.endsWith("_" + data_date + "." + file_suffix)) {
-				String tablename = filename.split("_" + data_date + "." + file_suffix)[0];
-				if (!tableNameList.contains(tablename)) {
+		JSONArray jsonarray = new JSONArray();
+		for (File everyfile : files) {
+			String filename = everyfile.getName();
+			if (filename.endsWith("_" + data_date + "." + filesuffix)) {
+				String tablename = filename.split("_" + data_date + "." + filesuffix)[0];
+				if (!tablenamelsit.contains(tablename)) {
 					try {
-						BufferedReader reader = new BufferedReader(new FileReader(file));
+						BufferedReader reader = new BufferedReader(new FileReader(everyfile));
 						String readLine = reader.readLine();
-						tableNameList.add(tablename);
-						Map<String, String> tableMap = new HashMap<>();
-						tableMap.put("zh_name", tablename);
-						tableMap.put("en_name", tablename);
-						tableMap.put("firstline", readLine);
-						tableList.add(tableMap);
+						tablenamelsit.add(tablename);
+						JSONObject everyobject = new JSONObject();
+						everyobject.put("table_name", tablename);
+						everyobject.put("table_ch_name", tablename);
+						everyobject.put("everyline", readLine);
+						jsonarray.add(everyobject);
 					} catch (Exception e) {
 						throw new BusinessException("没有数据字典时读取数据文件失败！");
 					}
 				}
 			}
 		}
-		if (tableList.size() == 0) {
-			resultObject.put("ErrorMessage", "数据路径的日期目录下没有后缀名为：" + file_suffix + "的文件");
-			throw new BusinessException(resultObject.getString("ErrorMessage"));
+		if (jsonarray.size() == 0) {
+			resultobject.put("ErrorMessage", "数据路径的日期目录下没有后缀名为：" + filesuffix + "的文件");
+			throw new BusinessException(resultobject.getString("ErrorMessage"));
 		}
-		return tableList;
+		resultobject.put("tablename", jsonarray);
+		return resultobject;
 	}
 
 }
