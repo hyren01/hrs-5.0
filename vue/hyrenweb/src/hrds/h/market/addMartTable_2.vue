@@ -540,6 +540,7 @@
                     functionAll.getDataBySQL({
                         'querysql': this.querysql,
                         'sqlparameter': this.sqlparameter,
+                        'datatable_id': this.datatable_id
                     }).then((res) => {
                         this.isLoading = false;
                         // if (res && res.data.success) {
@@ -722,6 +723,7 @@
                     "dm_column_storage": JSON.stringify(dm_column_storage),
                     "querysql": this.querysql,
                     "hbasesort": JSON.stringify(this.hbasesort),
+                    'ifrepeat': this.ifrepeat,
                 };
                 functionAll.addDFInfo(param).then((res) => {
                     this.isLoading = false;
@@ -867,10 +869,12 @@
                 }).then((res) => {
                     if (res && res.success) {
                         if (res.data.length > 0) {
-                            if (res.data.post_work != undefined)
-                                this.aftersql = res.data.post_work;
-                            if (res.data.pre_work != undefined)
-                                this.presql = res.data.pre_work;
+                            console.log(res.data[0].post_work);
+                            console.log(res.data[0].pre_work);
+                            if (res.data[0].post_work != undefined)
+                                this.aftersql = res.data[0].post_work;
+                            if (res.data[0].pre_work != undefined)
+                                this.presql = res.data[0].pre_work;
                         }
                     }
                 });

@@ -245,6 +245,7 @@ export default {
         //从监控当前作业回来
         goBack() {
             if (this.$route.query.etl_sys_cd && this.$route.query.etl_job) {
+                this.sys_cd = this.$route.query.etl_sys_cd;
                 this.form.etl_job = this.$route.query.etl_job;
             }
         },
@@ -516,18 +517,21 @@ export default {
         saveStop() {
             if (this.stopTitle == '确定批量执行停止操作?') {
                 let arr = [];
+                let etl_sys_cd = '';
                 this.multipleSelection.forEach((item) => {
                     let obj = {};
+                    etl_sys_cd = item.etl_sys_cd;
                     obj.etl_job = item.etl_job;
-                    obj.etl_sys_cd = item.etl_sys_cd;
-                    obj.etl_hand_type = 'JS';
-                    obj.curr_bath_date = item.curr_bath_date.replace(/-/g, "");
+                    obj.curr_bath_date = item.curr_bath_date;
                     arr.push(obj);
                 });
                 arr = JSON.stringify(arr);
+                let code = 'JS';
                 let params = {};
+                params["etl_sys_cd"] = etl_sys_cd;
+                params["etl_hand_type"] = code;
                 params["job_priority"] = 0;
-                params["jobHandBeans"] = arr;
+                params["batchEtlJob"] = arr;
                 jobLevelInterventeAllFun.batchJobLevelInterventionOperate(params).then(res => {
                     if (res && res.success) {
                         this.getJobInfo();
@@ -571,18 +575,21 @@ export default {
         savePass() {
             if (this.dropTitle == '确定批量执行跳过操作?') {
                 let arr = [];
+                let etl_sys_cd = '';
                 this.multipleSelection.forEach((item) => {
                     let obj = {};
-                    obj.etl_sys_cd = item.etl_sys_cd;
-                    obj.etl_hand_type = 'JJ';
+                    etl_sys_cd = item.etl_sys_cd;
                     obj.etl_job = item.etl_job;
-                    obj.curr_bath_date = item.curr_bath_date.replace(/-/g, "");
+                    obj.curr_bath_date = item.curr_bath_date;
                     arr.push(obj);
                 });
                 arr = JSON.stringify(arr);
+                let code = 'JJ';
                 let params = {};
+                params["etl_sys_cd"] = etl_sys_cd;
+                params["etl_hand_type"] = code;
                 params["job_priority"] = 0;
-                params["jobHandBeans"] = arr;
+                params["batchEtlJob"] = arr;
                 jobLevelInterventeAllFun.batchJobLevelInterventionOperate(params).then(res => {
                     if (res && res.success) {
                         this.getJobInfo();
@@ -626,18 +633,21 @@ export default {
         saveRefresh() {
             if (this.refTitle == '确定批量执行重跑操作?') {
                 let arr = [];
+                let etl_sys_cd = '';
                 this.multipleSelection.forEach((item) => {
                     let obj = {};
-                    obj.etl_sys_cd = item.etl_sys_cd;
-                    obj.etl_hand_type = 'JR';
+                    etl_sys_cd = item.etl_sys_cd;
                     obj.etl_job = item.etl_job;
-                    obj.curr_bath_date = item.curr_bath_date.replace(/-/g, "");
+                    obj.curr_bath_date = item.curr_bath_date;
                     arr.push(obj);
                 });
                 arr = JSON.stringify(arr);
+                let code = 'JR';
                 let params = {};
+                params["etl_sys_cd"] = etl_sys_cd;
+                params["etl_hand_type"] = code;
                 params["job_priority"] = 0;
-                params["jobHandBeans"] = arr;
+                params["batchEtlJob"] = arr;
                 jobLevelInterventeAllFun.batchJobLevelInterventionOperate(params).then(res => {
                     if (res && res.success) {
                         this.getJobInfo();
@@ -681,18 +691,21 @@ export default {
         saveForce() {
             if (this.forceTitle == '确定批量执行强制操作?') {
                 let arr = [];
+                let etl_sys_cd = '';
                 this.multipleSelection.forEach((item) => {
                     let obj = {};
-                    obj.etl_sys_cd = item.etl_sys_cd;
-                    obj.etl_hand_type = 'JT';
+                    etl_sys_cd = item.etl_sys_cd;
                     obj.etl_job = item.etl_job;
-                    obj.curr_bath_date = item.curr_bath_date.replace(/-/g, "");
+                    obj.curr_bath_date = item.curr_bath_date;
                     arr.push(obj);
                 });
                 arr = JSON.stringify(arr);
+                let code = 'JT';
                 let params = {};
+                params["etl_sys_cd"] = etl_sys_cd;
+                params["etl_hand_type"] = code;
                 params["job_priority"] = 0;
-                params["jobHandBeans"] = arr;
+                params["batchEtlJob"] = arr;
                 jobLevelInterventeAllFun.batchJobLevelInterventionOperate(params).then(res => {
                     if (res && res.success) {
                         this.getJobInfo();
@@ -735,18 +748,21 @@ export default {
         saveAdjust() {
             if (this.adjustTitle == '确定批量执行临时调整优先级操作?') {
                 let arr = [];
+                let etl_sys_cd = '';
                 this.multipleSelection.forEach((item) => {
                     let obj = {};
-                    obj.etl_sys_cd = item.etl_sys_cd;
+                    etl_sys_cd = item.etl_sys_cd;
                     obj.etl_job = item.etl_job;
-                    obj.etl_hand_type = 'JP';
-                    obj.curr_bath_date = item.curr_bath_date.replace(/-/g, "");
+                    obj.curr_bath_date = item.curr_bath_date;
                     arr.push(obj);
                 });
                 arr = JSON.stringify(arr);
+                let code = 'JP';
                 let params = {};
+                params["etl_sys_cd"] = etl_sys_cd;
+                params["etl_hand_type"] = code;
                 params["job_priority"] = this.formAdjust.currentLevel;
-                params["jobHandBeans"] = arr;
+                params["batchEtlJob"] = arr;
                 jobLevelInterventeAllFun.batchJobLevelInterventionOperate(params).then(res => {
                     if (res && res.success) {
                         this.getJobInfo();

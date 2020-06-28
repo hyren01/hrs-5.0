@@ -1,6 +1,6 @@
 <template>
 <div id="steps4">
-    <Step :active="active" :typeinfo='typeinfo'></Step>
+    <Step :active="active"></Step>
     <div class="cleanbtn">
         <el-button size="mini" type="success" @click="AllTable_SeparatorFun()" class="alltables">所有表分隔符设置</el-button>
     </div>
@@ -227,7 +227,6 @@ export default {
     data() {
         return {
             active: 3,
-            typeinfo:1,
             data2: [],
             defaultProps: {
                 children: "children",
@@ -409,7 +408,7 @@ export default {
                         }
                         let params = {},
                             dedid = this.delcomData;
-                        params["colSetId"] = parseInt(this.databaseId);
+                        params["colSetId"] =this.databaseId;
                         params["extractionDefString"] = JSON.stringify(extractionDefString);
                         params['dedId'] = JSON.parse(JSON.stringify(dedid)).join('^')
                         addTaskAllFun.saveFileConf(params).then(res => {

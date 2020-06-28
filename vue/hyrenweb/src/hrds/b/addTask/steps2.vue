@@ -1,6 +1,6 @@
 <template>
 <div class="singlesearch" id="singleTable">
-     <Step :active="active" :typeinfo='typeinfo'></Step>
+    <Step :active="active"></Step>
     <el-tabs v-model="activeName" type="border-card" @tab-click="handleClick">
         <el-tab-pane label="单表查询" name="first">
             <div id="singleTable">
@@ -519,7 +519,6 @@ export default {
     data() {
         return {
             active: 1,
-            typeinfo:1,
             tableloadingInfo: "数据加载中...",
             rule: validator.default,
             Allis_selectionState: false,
@@ -653,7 +652,7 @@ export default {
         };
     },
     created() {
-        this.dbid = parseInt(this.$route.query.id);
+        this.dbid =this.$route.query.id;
         this.agentId = this.$route.query.agent_id;
         this.sourceId = this.$route.query.source_id;
         this.sourceName = this.$Base64.decode(this.$route.query.source_name);
@@ -1099,7 +1098,7 @@ export default {
                                     //第一个页面卸数方式是增量存在的
                                     let params1 = {};
                                     params1["tableNames"] = isparmi; //勾选表并且卸数方式是增量
-                                    params1["colSetId"] = parseInt(this.dbid);
+                                    params1["colSetId"] =this.dbid;
                                     params1["tableIds"] =
                                         JSON.stringify(tableidArr1) === "{}" ?
                                         "" :
@@ -1305,7 +1304,7 @@ export default {
                 let params1 = {};
                 params1["tableInfoArray"] =
                     twotabledata.length > 0 ? JSON.stringify(twotabledata) : "";
-                params1["colSetId"] = parseInt(this.dbid);
+                params1["colSetId"] =this.dbid;
                 params1["tableColumn"] =
                     JSON.stringify(tableColumn) === "{}" ?
                     "" :
@@ -1445,8 +1444,7 @@ export default {
                     if (arrData[k].unload_type == "增量") {
                         tableInfoString.push({
                             database_id: this.dbid,
-                            table_id: (arrData[k].table_id&&arrData[k].table_id!=undefined)?
-                                parseInt(arrData[k].table_id) : "",
+                            table_id: (arrData[k].table_id&&arrData[k].table_id!=undefined)?arrData[k].table_id: "",
                             is_parallel: "0",
                             is_md5: arrData[k].is_md5 == true ? "1" : "0",
                             table_ch_name: arrData[k].table_ch_name,
@@ -1459,8 +1457,7 @@ export default {
                             if (arrData[k].is_customize_sql == "1") {
                                 tableInfoString.push({
                                     database_id: this.dbid,
-                                    table_id:(arrData[k].table_id&&arrData[k].table_id!=undefined)?
-                                        parseInt(arrData[k].table_id) : "",
+                                    table_id:(arrData[k].table_id&&arrData[k].table_id!=undefined)?arrData[k].table_id: "",
                                     is_parallel: "1",
                                     unload_type: "1",
                                     is_customize_sql: "1",
@@ -1474,8 +1471,7 @@ export default {
                                 tableInfoString.push({
                                     database_id: this.dbid,
                                     unload_type: "1",
-                                    table_id: (arrData[k].table_id&&arrData[k].table_id!=undefined)?
-                                        parseInt(arrData[k].table_id) : "",
+                                    table_id: (arrData[k].table_id&&arrData[k].table_id!=undefined)?arrData[k].table_id: "",
                                     is_parallel: "1",
                                     is_customize_sql: "0",
                                     is_md5: arrData[k].is_md5 == true ? "1" : "0",
@@ -1496,8 +1492,7 @@ export default {
                             tableInfoString.push({
                                 database_id: this.dbid,
                                 unload_type: "1",
-                                table_id:(arrData[k].table_id&&arrData[k].table_id!=undefined)?
-                                    parseInt(arrData[k].table_id) : "",
+                                table_id:(arrData[k].table_id&&arrData[k].table_id!=undefined)?arrData[k].table_id: "",
                                 is_parallel: "0",
                                 is_md5: arrData[k].is_md5 == true ? "1" : "0",
                                 table_ch_name: arrData[k].table_ch_name,
@@ -1574,7 +1569,7 @@ export default {
                     });
                 }
                 let collstring = collTbConfParamString;
-                params2["colSetId"] = parseInt(this.dbid);
+                params2["colSetId"] =this.dbid;
                 params2["tableInfoString"] = JSON.stringify(this.tablein);
                 params2["collTbConfParamString"] = JSON.stringify(collstring);
                 params2["delTbString"] =
@@ -1913,7 +1908,7 @@ export default {
         getTableDataCountFun() {
             let params = {};
             params["tableName"] = this.EXtable_name;
-            params["colSetId"] = parseInt(this.dbid);
+            params["colSetId"] =this.dbid;
             addTaskAllFun.getTableDataCount(params).then(res => {
                 var nowDate = new Date();
                 let date = {

@@ -5,21 +5,13 @@ import Qs from 'qs'
 /**(0)
  * 获取半结构化采集配置页面初始化的值
  */
-export function getAddObjectCollectConf(data) {
+export function searchObjectCollect(data) {
     return request({
-        url: '/B/agent/semistructured/collectconf/getAddObjectCollectConf',
+        url: '/B/agent/objectcollect/searchObjectCollect',
         params: data
     })
 }
-/**(0.1)
- * 获取半结构化采集配置编辑时页面初始化的值
- */
-export function getObjectCollectConfById(data) {
-    return request({
-        url: '/B/semistructured/collectconf/getObjectCollectConfById',
-        params: data
-    })
-}
+
 /**(1)
  * 获取半结构化采集配置页面初始化的值
  */
@@ -31,11 +23,11 @@ export function getCategoryItems(data) {
 }
 
 /**(2)
- * 新增或更新半结构化文件采集设置页面信息
+ * 保存半结构化文件采集设置页面信息
  */
-export function saveObjectCollect(data) {
+export function addObjectCollect(data) {
     return request({
-        url: '/B/agent/semistructured/collectconf/saveObjectCollect',
+        url: '/B/agent/objectcollect/addObjectCollect',
         params: data
     })
 }
@@ -53,7 +45,16 @@ export function selectPath(data) {
  */
 export function viewTable(data) {
     return request({
-        url: '/B/agent/semistructured/collectconf/viewTable',
+        url: '/B/agent/objectcollect/viewTable',
+        params: data
+    })
+}
+/**(5)
+ * 更新半结构化文件采集页面信息
+ */
+export function updateObjectCollect(data) {
+    return request({
+        url: '/B/agent/objectcollect/updateObjectCollect',
         params: data
     })
 }
@@ -64,7 +65,7 @@ export function viewTable(data) {
  */
 export function searchObjectCollectTask(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/searchObjectCollectTask',
+        url: '/B/agent/objectcollect/searchObjectCollectTask',
         params: data
     })
 }
@@ -82,7 +83,7 @@ export function searchObjectHandleType(data) {
  */
 export function searchCollectColumnStruct(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/searchObjectCollectStruct',
+        url: '/B/agent/objectcollect/searchCollectColumnStruct',
         params: data
     })
 }
@@ -91,7 +92,7 @@ export function searchCollectColumnStruct(data) {
  */
 export function saveHandleType(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/saveObjectHandleType',
+        url: '/B/agent/objectcollect/saveHandleType',
         params: data
     })
 }
@@ -100,7 +101,7 @@ export function saveHandleType(data) {
  */
 export function saveCollectColumnStruct(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/saveObjectCollectStruct',
+        url: '/B/agent/objectcollect/saveCollectColumnStruct',
         data: Qs.stringify(data),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
@@ -110,7 +111,7 @@ export function saveCollectColumnStruct(data) {
  */
 export function checkFieldsForSaveObjectCollectTask(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/checkFieldsForSaveObjectCollectTask',
+        url: '/B/agent/objectcollect/checkFieldsForSaveObjectCollectTask',
         data: Qs.stringify(data),
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     })
@@ -120,7 +121,7 @@ export function checkFieldsForSaveObjectCollectTask(data) {
  */
 export function getObjectCollectTreeInfo(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/getObjectCollectTreeInfo',
+        url: '/B/agent/objectcollect/getObjectCollectTreeInfo',
         params: data
     })
 }
@@ -129,7 +130,7 @@ export function getObjectCollectTreeInfo(data) {
  */
 export function saveObjectCollectTask(data) {
     return request({
-        url: '/B/agent/semistructured/collectfileconf/saveObjectCollectTask',
+        url: '/B/agent/objectcollect/saveObjectCollectTask',
         params: data
     })
 }
