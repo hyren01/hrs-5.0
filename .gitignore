@@ -1,15 +1,28 @@
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
+
+
+# Gradle
+.gradle
+/gradle
+build/
+/gradlew
+/gradlew.bat
+# Ignore Gradle GUI config
+gradle-app.setting
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+# Cache of project
+.gradletasknamecache
+
+### Java template
 # Compiled class file
 *.class
-
 # Log file
 *.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
 # Package Files #
 *.jar
 *.war
@@ -19,5 +32,8 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+# 开发中搞进来的各种自己用的文件
+TODO
+# office 缓存文件
+~$*.*
+resources
